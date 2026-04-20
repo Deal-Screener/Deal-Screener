@@ -3,692 +3,558 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deal Screener — Real Estate Analyzer</title>
+<title>Deal Screener</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --surface2: #1c1c1c;
-    --border: rgba(255,255,255,0.08);
-    --border-strong: rgba(255,255,255,0.15);
-    --text: #f0ede8;
-    --muted: #6b6b6b;
-    --accent: #b8ff57;
-    --accent-dim: rgba(184,255,87,0.12);
-    --accent-text: #0a0a0a;
-    --warn: #ffb547;
-    --warn-dim: rgba(255,181,71,0.12);
-    --danger: #ff6b6b;
-    --danger-dim: rgba(255,107,107,0.12);
-    --font-head: 'Syne', sans-serif;
-    --font-mono: 'DM Mono', monospace;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html { background: var(--bg); }
-  body {
-    font-family: var(--font-head);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 0 0 80px;
-  }
-
-  /* Header */
-  .header {
-    padding: 28px 20px 20px;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    z-index: 10;
-  }
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .logo {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .badge {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    padding: 3px 8px;
-    border-radius: 20px;
-  }
-
-  /* Mode tabs */
-  .tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .tab {
-    padding: 10px 0;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: transparent;
-    color: var(--muted);
-    font-family: var(--font-head);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: .04em;
-    cursor: pointer;
-    transition: all .2s;
-    text-align: center;
-  }
-  .tab.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-text);
-  }
-
-  /* Content */
-  .content { padding: 20px; }
-
-  /* Section label */
-  .section-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 24px 0 10px;
-  }
-  .section-label:first-child { margin-top: 0; }
-
-  /* Fields */
-  .field { margin-bottom: 12px; }
-  .field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: .04em;
-    margin-bottom: 6px;
-  }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .input-wrap { position: relative; }
-  .input-prefix {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    color: var(--muted);
-    pointer-events: none;
-  }
-  .input-suffix {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--muted);
-    pointer-events: none;
-  }
-  input[type=number] {
-    width: 100%;
-    height: 48px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 0 14px 0 26px;
-    outline: none;
-    transition: border-color .15s;
-    appearance: textfield;
-    -moz-appearance: textfield;
-  }
-  input[type=number]::-webkit-outer-spin-button,
-  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  input[type=number]:focus { border-color: var(--accent); }
-  input[type=number].no-prefix { padding-left: 14px; }
-  input[type=number].has-suffix { padding-right: 32px; }
-
-  /* Analyze button */
-  .btn-analyze {
-    width: 100%;
-    height: 56px;
-    background: var(--accent);
-    border: none;
-    border-radius: 10px;
-    color: var(--accent-text);
-    font-family: var(--font-head);
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    cursor: pointer;
-    margin-top: 24px;
-    transition: opacity .15s, transform .1s;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-analyze:active { transform: scale(0.98); opacity: .9; }
-
-  /* Results */
-  .results { margin-top: 28px; display: none; }
-
-  /* Verdict card */
-  .verdict {
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    border: 1px solid;
-    position: relative;
-    overflow: hidden;
-  }
-  .verdict::before {
-    content: '';
-    position: absolute;
-    top: -40px;
-    right: -40px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    opacity: .08;
-  }
-  .verdict.hot { background: var(--accent-dim); border-color: var(--accent); }
-  .verdict.hot::before { background: var(--accent); }
-  .verdict.warm { background: var(--warn-dim); border-color: var(--warn); }
-  .verdict.warm::before { background: var(--warn); }
-  .verdict.pass { background: var(--danger-dim); border-color: var(--danger); }
-  .verdict.pass::before { background: var(--danger); }
-  .verdict-tag {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .verdict.hot .verdict-tag { color: var(--accent); }
-  .verdict.warm .verdict-tag { color: var(--warn); }
-  .verdict.pass .verdict-tag { color: var(--danger); }
-  .verdict-label {
-    font-size: 28px;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-  .verdict-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
-
-  /* Metric cards */
-  .metrics {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .metric {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-  }
-  .metric .mlabel {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: .04em;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
-  .metric .mval {
-    font-family: var(--font-mono);
-    font-size: 22px;
-    font-weight: 500;
-  }
-  .mval.good { color: var(--accent); }
-  .mval.warn { color: var(--warn); }
-  .mval.bad { color: var(--danger); }
-  .mval.neutral { color: var(--text); }
-
-  /* Breakdown */
-  .breakdown {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  .breakdown-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
-  .brow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .brow:last-child { border-bottom: none; padding-bottom: 0; }
-  .brow .blabel { color: var(--muted); }
-  .brow .bval { font-family: var(--font-mono); font-weight: 500; color: var(--text); }
-  .brow.total { margin-top: 4px; }
-  .brow.total .blabel { color: var(--text); font-weight: 600; font-size: 14px; }
-  .brow.total .bval { font-size: 17px; }
-
-  /* Reset */
-  .btn-reset {
-    width: 100%;
-    height: 48px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--muted);
-    font-family: var(--font-head);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: .04em;
-    transition: border-color .15s, color .15s;
-  }
-  .btn-reset:hover { border-color: var(--border-strong); color: var(--text); }
-
-  /* Footer */
-  .footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: .04em;
-  }
-
-  /* Pulse animation on analyze */
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.01); }
-    100% { transform: scale(1); }
-  }
-  .results.show { display: block; animation: pulse .3s ease; }
-
-  /* Divider */
-  .divider { height: 1px; background: var(--border); margin: 4px 0 16px; }
+:root {
+  --bg:#0a0a0a; --surface:#141414; --surface2:#1c1c1c; --surface3:#222;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#f0ede8; --muted:#686868; --muted2:#888;
+  --accent:#b8ff57; --accent-dim:rgba(184,255,87,0.11); --accent-text:#0a0a0a;
+  --warn:#ffb547; --warn-dim:rgba(255,181,71,0.11);
+  --danger:#ff6b6b; --danger-dim:rgba(255,107,107,0.11);
+  --info:#57c4ff; --info-dim:rgba(87,196,255,0.11);
+  --fh:'Syne',sans-serif; --fm:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{font-family:var(--fh);background:var(--bg);color:var(--text);min-height:100vh;max-width:500px;margin:0 auto;padding-bottom:100px}
+.nav{padding:20px 18px 0;position:sticky;top:0;background:var(--bg);z-index:20;border-bottom:1px solid var(--border)}
+.nav-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.logo{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.logo span{color:var(--muted);font-weight:400}
+.nav-tabs{display:flex;gap:4px}
+.ntab{flex:1;padding:9px 4px;border:none;background:transparent;color:var(--muted);font-family:var(--fh);font-size:12px;font-weight:600;letter-spacing:.03em;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-align:center}
+.ntab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.page{display:none;padding:18px}
+.page.active{display:block}
+.slabel{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px}
+.slabel:first-child{margin-top:4px}
+.toggle-row{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:6px}
+.tog{flex:1;padding:8px 6px;border:none;background:transparent;color:var(--muted);font-family:var(--fh);font-size:12px;font-weight:600;cursor:pointer;border-radius:6px;transition:all .2s;text-align:center}
+.tog.active{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.preset{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted2);font-family:var(--fh);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+.preset.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.iw{position:relative}
+.ipfx,.isfx{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--fm);font-size:13px;color:var(--muted);pointer-events:none}
+.ipfx{left:11px}.isfx{right:11px}
+input[type=number]{width:100%;height:46px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:15px;font-weight:500;padding:0 12px 0 24px;outline:none;transition:border-color .15s;-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]:focus{border-color:var(--accent)}
+input[type=number].np{padding-left:12px}
+input[type=number].ns{padding-right:28px}
+input[type=text]{width:100%;height:46px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fh);font-size:14px;padding:0 12px;outline:none;transition:border-color .15s}
+input[type=text]:focus{border-color:var(--accent)}
+.helper{background:var(--info-dim);border:1px solid rgba(87,196,255,0.2);border-radius:8px;padding:12px;margin-bottom:6px}
+.helper-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--info);margin-bottom:8px}
+.helper p{font-size:12px;color:var(--muted2);line-height:1.6;margin-bottom:6px}
+.helper p:last-child{margin-bottom:0}
+.helper strong{color:var(--text);font-weight:600}
+.helper-toggle{background:transparent;border:none;color:var(--info);font-family:var(--fh);font-size:10px;font-weight:600;cursor:pointer;padding:0;letter-spacing:.04em}
+.arv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.arv-item{background:var(--surface2);border-radius:6px;padding:10px}
+.arv-item-label{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.arv-item-val{font-family:var(--fm);font-size:15px;font-weight:500;color:var(--accent)}
+.btn-analyze{width:100%;height:54px;background:var(--accent);border:none;border-radius:10px;color:var(--accent-text);font-family:var(--fh);font-size:14px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:20px;transition:opacity .15s,transform .1s}
+.btn-analyze:active{transform:scale(0.98);opacity:.9}
+.results{margin-top:24px;display:none}
+.verdict{border-radius:12px;padding:18px;margin-bottom:14px;border:1px solid}
+.verdict.hot{background:var(--accent-dim);border-color:rgba(184,255,87,0.35)}
+.verdict.warm{background:var(--warn-dim);border-color:rgba(255,181,71,0.35)}
+.verdict.pass{background:var(--danger-dim);border-color:rgba(255,107,107,0.35)}
+.vtag{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.verdict.hot .vtag{color:var(--accent)}.verdict.warm .vtag{color:var(--warn)}.verdict.pass .vtag{color:var(--danger)}
+.vlabel{font-size:26px;font-weight:800;line-height:1;margin-bottom:7px}
+.vsub{font-size:13px;color:var(--muted2);line-height:1.5}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px}
+.mlabel{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.mval{font-family:var(--fm);font-size:21px;font-weight:500}
+.mval.good{color:var(--accent)}.mval.warn{color:var(--warn)}.mval.bad{color:var(--danger)}.mval.neu{color:var(--text)}
+.bkd{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.bkd-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.brow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.brow:last-child{border-bottom:none}
+.brow.tot .bl{font-weight:600;color:var(--text);font-size:14px}
+.bl{color:var(--muted)}.bv{font-family:var(--fm);font-weight:500;color:var(--text)}
+.save-row{display:flex;gap:8px;margin-bottom:10px}
+.inp-name{flex:1}
+.btn-save{padding:0 16px;height:46px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fh);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+.btn-save:hover{border-color:var(--accent);color:var(--accent)}
+.btn-reset{width:100%;height:44px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--fh);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-reset:hover{border-color:var(--border2);color:var(--text)}
+.deals-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.deals-title{font-size:16px;font-weight:700}
+.deal-count{font-size:12px;color:var(--muted);font-family:var(--fm)}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.filter-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-family:var(--fh);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+.filter-btn.active{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+.deal-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;transition:border-color .2s}
+.deal-card:hover{border-color:var(--border2)}
+.deal-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.deal-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.deal-meta{font-size:11px;color:var(--muted)}
+.deal-badge{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;flex-shrink:0}
+.badge-hot{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(184,255,87,0.3)}
+.badge-warm{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(255,181,71,0.3)}
+.badge-pass{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(255,107,107,0.3)}
+.deal-stats{display:flex;gap:16px}
+.deal-stat{font-size:12px;color:var(--muted)}
+.deal-stat strong{color:var(--text);font-family:var(--fm)}
+.btn-del{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;transition:color .2s}
+.btn-del:hover{color:var(--danger)}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state p{font-size:14px;line-height:1.8}
+.empty-icon{font-size:36px;margin-bottom:12px;opacity:.3}
+.tip{font-size:12px;color:var(--muted2);line-height:1.6;padding:10px 12px;background:var(--surface);border-left:2px solid var(--border2);border-radius:0 6px 6px 0;margin-bottom:4px}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-top">
-    <div class="logo">Deal Screener</div>
-    <div class="badge">Real Estate Analyzer</div>
+<div class="nav">
+  <div class="nav-top">
+    <div class="logo">Deal Screener <span>/ CLT &amp; STR Markets</span></div>
   </div>
-  <div class="tabs">
-    <button class="tab active" onclick="setMode('flip', this)">Fix &amp; Flip</button>
-    <button class="tab" onclick="setMode('vrental', this)">Vacation Rental</button>
+  <div class="nav-tabs">
+    <button class="ntab active" onclick="showPage('flip',this)">Fix &amp; Flip</button>
+    <button class="ntab" onclick="showPage('str',this)">Short-Term Rental</button>
+    <button class="ntab" onclick="showPage('saved',this)">Saved Deals</button>
   </div>
 </div>
 
-<div class="content">
+<!-- FIX AND FLIP -->
+<div class="page active" id="page-flip">
 
-  <!-- FIX & FLIP FORM -->
-  <div id="flip-form">
-    <div class="section-label">Property Info</div>
+  <div class="slabel">Renovation Type</div>
+  <div class="toggle-row">
+    <button class="tog active" id="tog-self" onclick="setReno('self')">Self-Renovating</button>
+    <button class="tog" id="tog-hire" onclick="setReno('hire')">Hiring Out</button>
+  </div>
+  <div class="tip" id="reno-tip">Self-renovating within 1hr of Charlotte. Your construction background is a massive edge — no GC markup. Carrying costs set low at $800/mo.</div>
 
-    <div class="field-row">
-      <div class="field">
-        <label>Asking Price</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="f-ask" placeholder="185,000">
-        </div>
-      </div>
-      <div class="field">
-        <label>After Repair Value</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="f-arv" placeholder="340,000">
-        </div>
-      </div>
-    </div>
+  <div class="slabel">Property Info</div>
+  <div class="frow">
+    <div class="field"><label>Asking Price</label><div class="iw"><span class="ipfx">$</span><input type="number" id="f-ask" placeholder="185,000"></div></div>
+    <div class="field"><label>After Repair Value</label><div class="iw"><span class="ipfx">$</span><input type="number" id="f-arv" placeholder="340,000"></div></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label>Repair Costs</label><div class="iw"><span class="ipfx">$</span><input type="number" id="f-rep" placeholder="60,000"></div></div>
+    <div class="field"><label>Hold Period</label><div class="iw"><input type="number" id="f-hold" class="np ns" value="5" placeholder="5"><span class="isfx">mo</span></div></div>
+  </div>
 
-    <div class="field-row">
-      <div class="field">
-        <label>Repair Costs</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="f-rep" placeholder="60,000">
-        </div>
-      </div>
-      <div class="field">
-        <label>Hold Period</label>
-        <div class="input-wrap">
-          <input type="number" id="f-hold" class="no-prefix has-suffix" value="6" placeholder="6">
-          <span class="input-suffix">mo</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-label">Cost Assumptions</div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Buy Closing Costs</label>
-        <div class="input-wrap">
-          <input type="number" id="f-cc1" class="no-prefix has-suffix" value="2" placeholder="2">
-          <span class="input-suffix">%</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Sell Closing Costs</label>
-        <div class="input-wrap">
-          <input type="number" id="f-cc2" class="no-prefix has-suffix" value="8" placeholder="8">
-          <span class="input-suffix">%</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Carrying Costs/Mo</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="f-carry" value="1200" placeholder="1,200">
-        </div>
-      </div>
-      <div class="field">
-        <label>Min Profit Target</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="f-target" value="30000" placeholder="30,000">
-        </div>
-      </div>
+  <div class="slabel">ARV Guide <button class="helper-toggle" onclick="toggleH('arv-h')">(show)</button></div>
+  <div class="helper" id="arv-h" style="display:none">
+    <div class="helper-title">Estimating After Repair Value</div>
+    <p><strong>Step 1:</strong> Search Zillow for homes sold in the last 90 days within 0.5 miles — same beds, baths, similar sqft.</p>
+    <p><strong>Step 2:</strong> Find average price per sqft. Example: $320k ÷ 1,600 sqft = <strong>$200/sqft</strong></p>
+    <p><strong>Step 3:</strong> Multiply by your property sqft. 1,800 × $200 = <strong>$360k ARV</strong></p>
+    <div class="arv-grid">
+      <div class="arv-item"><div class="arv-item-label">Urban CLT (NoDa/SouthEnd)</div><div class="arv-item-val">$250–350/sf</div></div>
+      <div class="arv-item"><div class="arv-item-label">Suburban (Concord/Gastonia)</div><div class="arv-item-val">$130–185/sf</div></div>
     </div>
   </div>
 
-  <!-- VACATION RENTAL FORM -->
-  <div id="vrental-form" style="display:none">
-    <div class="section-label">Property Info</div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Purchase Price</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="v-price" placeholder="420,000">
-        </div>
-      </div>
-      <div class="field">
-        <label>Down Payment</label>
-        <div class="input-wrap">
-          <input type="number" id="v-down" class="no-prefix has-suffix" value="20" placeholder="20">
-          <span class="input-suffix">%</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Gross Annual Rent</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="v-rent" placeholder="55,000">
-        </div>
-      </div>
-      <div class="field">
-        <label>Occupancy Rate</label>
-        <div class="input-wrap">
-          <input type="number" id="v-occ" class="no-prefix has-suffix" value="65" placeholder="65">
-          <span class="input-suffix">%</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-label">Annual Expenses</div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Property Mgmt</label>
-        <div class="input-wrap">
-          <input type="number" id="v-mgmt" class="no-prefix has-suffix" value="25" placeholder="25">
-          <span class="input-suffix">%</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Taxes + Insurance</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="v-tax" value="6000" placeholder="6,000">
-        </div>
-      </div>
-    </div>
-
-    <div class="field-row">
-      <div class="field">
-        <label>Maintenance/Yr</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input type="number" id="v-maint" value="3000" placeholder="3,000">
-        </div>
-      </div>
-      <div class="field">
-        <label>Min Cash-on-Cash</label>
-        <div class="input-wrap">
-          <input type="number" id="v-target" class="no-prefix has-suffix" value="8" placeholder="8">
-          <span class="input-suffix">%</span>
-        </div>
-      </div>
-    </div>
+  <div class="slabel">Repair Cost Guide <button class="helper-toggle" onclick="toggleH('rep-h')">(show)</button></div>
+  <div class="helper" id="rep-h" style="display:none">
+    <div class="helper-title">Repair Cost Ranges (your background helps here)</div>
+    <p><strong>Light cosmetic:</strong> Paint, floors, fixtures, landscaping — <strong>$15–25/sqft</strong></p>
+    <p><strong>Mid rehab:</strong> Kitchen update, bath, roof, HVAC — <strong>$35–55/sqft</strong></p>
+    <p><strong>Full gut (your wheelhouse):</strong> Everything new — <strong>$65–100/sqft</strong></p>
+    <p><strong>Your edge:</strong> Self-managing the build saves 20–30% vs. hiring a GC. On a $80k job that's $16–24k back in your pocket.</p>
   </div>
 
-  <button class="btn-analyze" onclick="analyze()">Analyze Deal</button>
-
-  <!-- RESULTS -->
-  <div class="results" id="results">
-
-    <div class="verdict" id="verdict-box">
-      <div class="verdict-tag" id="verdict-tag"></div>
-      <div class="verdict-label" id="verdict-label"></div>
-      <div class="verdict-sub" id="verdict-sub"></div>
-    </div>
-
-    <div class="metrics" id="metrics-grid"></div>
-
-    <div class="breakdown">
-      <div class="breakdown-title">Full Breakdown</div>
-      <div id="breakdown-rows"></div>
-    </div>
-
-    <button class="btn-reset" onclick="reset()">Clear &amp; Start New Deal</button>
+  <div class="slabel">Cost Assumptions</div>
+  <div class="frow">
+    <div class="field"><label>Buy Closing Costs</label><div class="iw"><input type="number" id="f-cc1" class="np ns" value="2"><span class="isfx">%</span></div></div>
+    <div class="field"><label>Sell Closing Costs</label><div class="iw"><input type="number" id="f-cc2" class="np ns" value="8"><span class="isfx">%</span></div></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label>Carrying Costs/Mo</label><div class="iw"><span class="ipfx">$</span><input type="number" id="f-carry" value="800"></div></div>
+    <div class="field"><label>Min Profit Target</label><div class="iw"><span class="ipfx">$</span><input type="number" id="f-target" value="40000"></div></div>
   </div>
 
+  <button class="btn-analyze" onclick="analyzeFlip()">Analyze This Deal</button>
+
+  <div class="results" id="flip-results">
+    <div class="verdict" id="f-verdict">
+      <div class="vtag" id="f-vtag"></div>
+      <div class="vlabel" id="f-vlabel"></div>
+      <div class="vsub" id="f-vsub"></div>
+    </div>
+    <div class="metrics" id="f-metrics"></div>
+    <div class="bkd"><div class="bkd-title">Full Cost Breakdown</div><div id="f-bkd"></div></div>
+    <div class="save-row">
+      <input type="text" class="inp-name" id="f-save-name" placeholder="Name this deal (e.g. 412 Oak St)">
+      <button class="btn-save" onclick="saveDeal('flip')">Save</button>
+    </div>
+    <button class="btn-reset" onclick="resetPage('flip')">Clear &amp; Start New</button>
+  </div>
 </div>
 
-<div class="footer">Built for real estate investors &nbsp;·&nbsp; No data stored</div>
+<!-- SHORT TERM RENTAL -->
+<div class="page" id="page-str">
+
+  <div class="slabel">Target Market</div>
+  <div class="presets" id="str-presets">
+    <button class="preset active" onclick="setMarket('ocean',this)">Ocean Lakes SC</button>
+    <button class="preset" onclick="setMarket('gatlinburg',this)">Gatlinburg TN</button>
+    <button class="preset" onclick="setMarket('pigeon',this)">Pigeon Forge TN</button>
+    <button class="preset" onclick="setMarket('sevier',this)">Sevierville TN</button>
+    <button class="preset" onclick="setMarket('custom',this)">Custom</button>
+  </div>
+  <div class="tip" id="market-tip">Ocean Lakes is a gated resort community — premium rates, strong demand, limited supply. Avg nightly $250–350. Occupancy 65–75% annually.</div>
+
+  <div class="slabel">Property Info</div>
+  <div class="frow">
+    <div class="field"><label>Purchase Price</label><div class="iw"><span class="ipfx">$</span><input type="number" id="v-price" placeholder="420,000"></div></div>
+    <div class="field"><label>Down Payment</label><div class="iw"><input type="number" id="v-down" class="np ns" value="20"><span class="isfx">%</span></div></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label>Avg Nightly Rate</label><div class="iw"><span class="ipfx">$</span><input type="number" id="v-nightly" placeholder="275"></div></div>
+    <div class="field"><label>Occupancy Rate</label><div class="iw"><input type="number" id="v-occ" class="np ns" value="68"><span class="isfx">%</span></div></div>
+  </div>
+
+  <div class="slabel">Management</div>
+  <div class="toggle-row">
+    <button class="tog active" id="tog-self-mgmt" onclick="setMgmt('self')">Self-Manage</button>
+    <button class="tog" id="tog-pro-mgmt" onclick="setMgmt('pro')">Property Manager</button>
+  </div>
+  <div class="tip" id="mgmt-tip">Self-managing saves big — platform fees only (~10%). While your wife is still working, consider a co-host at 15% as a middle ground.</div>
+
+  <div class="slabel">Annual Expenses</div>
+  <div class="frow">
+    <div class="field"><label>Mgmt / Platform Fee</label><div class="iw"><input type="number" id="v-mgmt" class="np ns" value="10"><span class="isfx">%</span></div></div>
+    <div class="field"><label>Taxes + Insurance</label><div class="iw"><span class="ipfx">$</span><input type="number" id="v-tax" value="6000"></div></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label>Maintenance/Yr</label><div class="iw"><span class="ipfx">$</span><input type="number" id="v-maint" value="3500"></div></div>
+    <div class="field"><label>Min Cash-on-Cash</label><div class="iw"><input type="number" id="v-target" class="np ns" value="6"><span class="isfx">%</span></div></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label>Mortgage Rate</label><div class="iw"><input type="number" id="v-rate" class="np ns" value="7"><span class="isfx">%</span></div></div>
+    <div class="field"><label>Furnishing Cost</label><div class="iw"><span class="ipfx">$</span><input type="number" id="v-furn" value="15000"></div></div>
+  </div>
+
+  <button class="btn-analyze" onclick="analyzeSTR()">Analyze This Deal</button>
+
+  <div class="results" id="str-results">
+    <div class="verdict" id="v-verdict">
+      <div class="vtag" id="v-vtag"></div>
+      <div class="vlabel" id="v-vlabel"></div>
+      <div class="vsub" id="v-vsub"></div>
+    </div>
+    <div class="metrics" id="v-metrics"></div>
+    <div class="bkd"><div class="bkd-title">Full Income &amp; Expense Breakdown</div><div id="v-bkd"></div></div>
+    <div class="save-row">
+      <input type="text" class="inp-name" id="v-save-name" placeholder="Name this deal (e.g. Ocean Lakes Cabin)">
+      <button class="btn-save" onclick="saveDeal('str')">Save</button>
+    </div>
+    <button class="btn-reset" onclick="resetPage('str')">Clear &amp; Start New</button>
+  </div>
+</div>
+
+<!-- SAVED DEALS -->
+<div class="page" id="page-saved">
+  <div class="deals-header">
+    <div class="deals-title">Saved Deals</div>
+    <div class="deal-count" id="deal-count">0 deals</div>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="filterDeals('all',this)">All</button>
+    <button class="filter-btn" onclick="filterDeals('flip',this)">Fix &amp; Flip</button>
+    <button class="filter-btn" onclick="filterDeals('str',this)">STR</button>
+    <button class="filter-btn" onclick="filterDeals('hot',this)">Hot Only</button>
+  </div>
+  <div id="deals-list"></div>
+</div>
 
 <script>
-let mode = 'flip';
+let renoMode='self', mgmtMode='self', currentMarket='ocean';
+let lastFlip=null, lastSTR=null, activeFilter='all';
 
-function setMode(m, el) {
-  mode = m;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+const MARKETS={
+  ocean:      {nightly:280,occ:68,tip:'Ocean Lakes is a gated resort community — premium rates, strong demand, limited supply. Avg nightly $250–350. Occupancy 65–75% annually.'},
+  gatlinburg: {nightly:320,occ:72,tip:'Gatlinburg is one of the top STR markets in the US. Cabin demand is massive — fall and winter peak. Avg nightly $275–400. Strong year-round occupancy.'},
+  pigeon:     {nightly:290,occ:70,tip:'Pigeon Forge offers slightly lower entry prices than Gatlinburg with strong family demand driven by Dollywood. Great mid-range market.'},
+  sevier:     {nightly:250,occ:65,tip:'Sevierville is the most affordable Smokies entry point. Lower nightly rates but lower purchase prices — good for your first STR deal.'},
+  custom:     {nightly:200,occ:65,tip:'Custom market — enter your own nightly rate and occupancy. Check AirDNA.co or Rabbu.com for accurate local data before committing.'},
+};
+
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
   el.classList.add('active');
-  document.getElementById('flip-form').style.display = m === 'flip' ? 'block' : 'none';
-  document.getElementById('vrental-form').style.display = m === 'vrental' ? 'block' : 'none';
-  reset();
+  if(id==='saved') renderDeals();
 }
 
-function reset() {
-  const r = document.getElementById('results');
-  r.classList.remove('show');
-  r.style.display = 'none';
-}
-
-function fmt(n) {
-  return '$' + Math.round(n).toLocaleString();
-}
-
-function pct(n) {
-  return (Math.round(n * 10) / 10) + '%';
-}
-
-function colorClass(val, good, ok) {
-  return val >= good ? 'good' : val >= ok ? 'warn' : 'bad';
-}
-
-function showResults(verdict, vsub, cls, metrics, rows) {
-  const vbox = document.getElementById('verdict-box');
-  vbox.className = 'verdict ' + cls;
-  document.getElementById('verdict-tag').textContent = cls === 'hot' ? 'Strong Signal' : cls === 'warm' ? 'Needs Negotiation' : 'Not a Deal';
-  document.getElementById('verdict-label').textContent = verdict;
-  document.getElementById('verdict-sub').textContent = vsub;
-
-  const mg = document.getElementById('metrics-grid');
-  mg.innerHTML = metrics.map(m =>
-    `<div class="metric"><div class="mlabel">${m.label}</div><div class="mval ${m.cls}">${m.val}</div></div>`
-  ).join('');
-
-  const br = document.getElementById('breakdown-rows');
-  br.innerHTML = rows.map((r, i) =>
-    `<div class="brow ${r.total ? 'total' : ''}"><span class="blabel">${r.label}</span><span class="bval" style="${r.color ? 'color:' + r.color : ''}">${r.val}</span></div>`
-  ).join('');
-
-  const res = document.getElementById('results');
-  res.style.display = 'block';
-  setTimeout(() => res.classList.add('show'), 10);
-  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function analyze() {
-  if (mode === 'flip') analyzeFlip();
-  else analyzeVR();
-}
-
-function analyzeFlip() {
-  const ask    = +document.getElementById('f-ask').value || 0;
-  const arv    = +document.getElementById('f-arv').value || 0;
-  const rep    = +document.getElementById('f-rep').value || 0;
-  const hold   = +document.getElementById('f-hold').value || 6;
-  const cc1    = (+document.getElementById('f-cc1').value || 2) / 100;
-  const cc2    = (+document.getElementById('f-cc2').value || 8) / 100;
-  const carry  = +document.getElementById('f-carry').value || 1200;
-  const target = +document.getElementById('f-target').value || 30000;
-
-  if (!ask || !arv) { alert('Please enter at least Asking Price and ARV.'); return; }
-
-  const buyCost  = ask * cc1;
-  const sellCost = arv * cc2;
-  const holdCost = carry * hold;
-  const totalIn  = ask + rep + buyCost + holdCost;
-  const profit   = arv - totalIn - sellCost;
-  const roi      = (profit / totalIn) * 100;
-  const maxOffer = arv * 0.70 - rep;
-  const equity   = arv - ask - rep;
-
-  let verdict, vsub, cls;
-  if (profit >= target && roi >= 20) {
-    verdict = 'Hot Deal'; cls = 'hot';
-    vsub = 'Meets your profit target and ROI. Move quickly — deals like this don\'t last.';
-  } else if (profit >= target * 0.75 && roi >= 12) {
-    verdict = 'Negotiate Hard'; cls = 'warm';
-    vsub = 'You\'re close. Push the seller on price or renegotiate repair scope to hit your number.';
+function setReno(mode){
+  renoMode=mode;
+  document.getElementById('tog-self').classList.toggle('active',mode==='self');
+  document.getElementById('tog-hire').classList.toggle('active',mode==='hire');
+  if(mode==='self'){
+    document.getElementById('f-carry').value=800;
+    document.getElementById('f-target').value=40000;
+    document.getElementById('reno-tip').textContent='Self-renovating within 1hr of Charlotte. Your construction background is a massive edge — no GC markup. Carrying costs set low at $800/mo.';
   } else {
-    verdict = 'Pass on This One'; cls = 'pass';
-    vsub = 'The numbers don\'t work at asking price. Walk away or counter at max offer below.';
+    document.getElementById('f-carry').value=2200;
+    document.getElementById('f-target').value=50000;
+    document.getElementById('reno-tip').textContent='Hiring out — you can work further from Charlotte. GC overhead adds 20–30% to repair costs. Higher profit target set to compensate.';
+  }
+}
+
+function setMarket(key,el){
+  currentMarket=key;
+  document.querySelectorAll('#str-presets .preset').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const m=MARKETS[key];
+  document.getElementById('v-nightly').value=m.nightly;
+  document.getElementById('v-occ').value=m.occ;
+  document.getElementById('market-tip').textContent=m.tip;
+}
+
+function setMgmt(mode){
+  mgmtMode=mode;
+  document.getElementById('tog-self-mgmt').classList.toggle('active',mode==='self');
+  document.getElementById('tog-pro-mgmt').classList.toggle('active',mode==='pro');
+  if(mode==='self'){
+    document.getElementById('v-mgmt').value=10;
+    document.getElementById('mgmt-tip').textContent='Self-managing saves big — platform fees only (~10%). While your wife is still working, consider a co-host at 15% as a middle ground.';
+  } else {
+    document.getElementById('v-mgmt').value=28;
+    document.getElementById('mgmt-tip').textContent='Professional manager: ~25–30% of revenue. Hands-off but eats into cash flow. Worth it until your wife can join the business full time.';
+  }
+}
+
+function toggleH(id){
+  const el=document.getElementById(id);
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function pct(n){return(Math.round(n*10)/10)+'%';}
+function cc(v,g,w){return v>=g?'good':v>=w?'warn':'bad';}
+
+function renderMetrics(id,metrics){
+  document.getElementById(id).innerHTML=metrics.map(m=>
+    `<div class="metric"><div class="mlabel">${m.l}</div><div class="mval ${m.c}">${m.v}</div></div>`
+  ).join('');
+}
+
+function renderBkd(id,rows){
+  document.getElementById(id).innerHTML=rows.map(r=>
+    `<div class="brow ${r.tot?'tot':''}"><span class="bl">${r.l}</span><span class="bv" style="${r.color?'color:'+r.color:''}">${r.v}</span></div>`
+  ).join('');
+}
+
+function setVerdict(pre,verdict,sub,cls){
+  document.getElementById(pre+'-verdict').className='verdict '+cls;
+  document.getElementById(pre+'-vtag').textContent=cls==='hot'?'Strong Signal':cls==='warm'?'Negotiate':'Pass';
+  document.getElementById(pre+'-vlabel').textContent=verdict;
+  document.getElementById(pre+'-vsub').textContent=sub;
+}
+
+function analyzeFlip(){
+  const ask=+document.getElementById('f-ask').value||0;
+  const arv=+document.getElementById('f-arv').value||0;
+  const rep=+document.getElementById('f-rep').value||0;
+  const hold=+document.getElementById('f-hold').value||5;
+  const cc1=(+document.getElementById('f-cc1').value||2)/100;
+  const cc2=(+document.getElementById('f-cc2').value||8)/100;
+  const carry=+document.getElementById('f-carry').value||800;
+  const target=+document.getElementById('f-target').value||40000;
+  if(!ask||!arv){alert('Enter Asking Price and ARV to continue.');return;}
+
+  const buyCost=ask*cc1;
+  const sellCost=arv*cc2;
+  const holdCost=carry*hold;
+  const totalIn=ask+rep+buyCost+holdCost;
+  const profit=arv-totalIn-sellCost;
+  const roi=(profit/totalIn)*100;
+  const maxOffer=arv*0.70-rep;
+  const equity=arv-ask-rep;
+
+  let verdict,vsub,cls;
+  if(profit>=target&&roi>=18){
+    verdict='Hot Deal';cls='hot';
+    vsub='Meets your profit target with strong ROI. Solid Charlotte-area deals move fast — if ARV is confirmed, act quickly.';
+  } else if(profit>=target*0.75&&roi>=12){
+    verdict='Negotiate Hard';cls='warm';
+    vsub=`Close to your number. A counter at or near ${fmt(maxOffer)} could flip this to a strong deal. Push on price or repairs.`;
+  } else {
+    verdict='Pass';cls='pass';
+    vsub=`Doesn\'t work at asking. Max offer per 70% rule: ${fmt(maxOffer)}. Counter there or walk — don\'t chase this one.`;
   }
 
-  showResults(verdict, vsub, cls,
-    [
-      { label: 'Net Profit',       val: fmt(profit),   cls: colorClass(profit, target, target * 0.75) },
-      { label: 'ROI',              val: pct(roi),       cls: colorClass(roi, 20, 12) },
-      { label: 'Max Offer (70%)',  val: fmt(maxOffer),  cls: 'neutral' },
-      { label: 'Equity Spread',    val: fmt(equity),    cls: colorClass(equity, 80000, 40000) },
-    ],
-    [
-      { label: 'Purchase price',                      val: fmt(ask) },
-      { label: 'Repair costs',                        val: fmt(rep) },
-      { label: `Buy closing (${Math.round(cc1*100)}%)`, val: fmt(buyCost) },
-      { label: `Carrying costs (${hold} mo)`,         val: fmt(holdCost) },
-      { label: `Sell closing (${Math.round(cc2*100)}%)`, val: fmt(sellCost) },
-      { label: 'Total all-in cost',                   val: fmt(totalIn + sellCost) },
-      { label: 'Net profit',                          val: fmt(profit), total: true, color: profit >= 0 ? '#b8ff57' : '#ff6b6b' },
-    ]
-  );
+  setVerdict('f',verdict,vsub,cls);
+  renderMetrics('f-metrics',[
+    {l:'Net Profit',v:fmt(profit),c:cc(profit,target,target*0.75)},
+    {l:'ROI',v:pct(roi),c:cc(roi,18,12)},
+    {l:'Max Offer (70%)',v:fmt(maxOffer),c:'neu'},
+    {l:'Equity Spread',v:fmt(equity),c:cc(equity,80000,45000)},
+  ]);
+  renderBkd('f-bkd',[
+    {l:'Asking price',v:fmt(ask)},
+    {l:'Repair costs',v:fmt(rep)},
+    {l:`Buy closing (${Math.round(cc1*100)}%)`,v:fmt(buyCost)},
+    {l:`Carrying (${hold} mo × ${fmt(carry)})`,v:fmt(holdCost)},
+    {l:`Sell closing (${Math.round(cc2*100)}%)`,v:fmt(sellCost)},
+    {l:'Total all-in cost',v:fmt(totalIn+sellCost)},
+    {l:'Net profit',v:fmt(profit),tot:true,color:profit>=0?'#b8ff57':'#ff6b6b'},
+  ]);
+
+  lastFlip={ask,arv,rep,hold,profit,roi,maxOffer,equity,verdict,cls};
+  const r=document.getElementById('flip-results');
+  r.style.display='block';
+  r.scrollIntoView({behavior:'smooth'});
 }
 
-function analyzeVR() {
-  const price  = +document.getElementById('v-price').value || 0;
-  const down   = (+document.getElementById('v-down').value || 20) / 100;
-  const rent   = +document.getElementById('v-rent').value || 0;
-  const occ    = (+document.getElementById('v-occ').value || 65) / 100;
-  const mgmt   = (+document.getElementById('v-mgmt').value || 25) / 100;
-  const tax    = +document.getElementById('v-tax').value || 0;
-  const maint  = +document.getElementById('v-maint').value || 0;
-  const tgtCoc = +document.getElementById('v-target').value || 8;
+function analyzeSTR(){
+  const price=+document.getElementById('v-price').value||0;
+  const down=(+document.getElementById('v-down').value||20)/100;
+  const nightly=+document.getElementById('v-nightly').value||0;
+  const occ=(+document.getElementById('v-occ').value||68)/100;
+  const mgmtPct=(+document.getElementById('v-mgmt').value||10)/100;
+  const tax=+document.getElementById('v-tax').value||0;
+  const maint=+document.getElementById('v-maint').value||0;
+  const tgtCoc=+document.getElementById('v-target').value||6;
+  const rate=(+document.getElementById('v-rate').value||7)/100;
+  const furn=+document.getElementById('v-furn').value||0;
+  if(!price||!nightly){alert('Enter Purchase Price and Nightly Rate to continue.');return;}
 
-  if (!price || !rent) { alert('Please enter Purchase Price and Gross Annual Rent.'); return; }
+  const grossRent=nightly*365*occ;
+  const mgmtCost=grossRent*mgmtPct;
+  const totalExp=mgmtCost+tax+maint;
+  const noi=grossRent-totalExp;
+  const capRate=(noi/price)*100;
+  const downAmt=price*down;
+  const loan=price-downAmt;
+  const mr=rate/12;
+  const mo=loan*mr*Math.pow(1+mr,360)/(Math.pow(1+mr,360)-1);
+  const debt=mo*12;
+  const cashflow=noi-debt;
+  const totalInvest=downAmt+furn;
+  const coc=totalInvest>0?(cashflow/totalInvest)*100:0;
+  const grm=Math.round((price/grossRent)*10)/10;
+  const mkt=MARKETS[currentMarket]?MARKETS[currentMarket].tip.split('—')[0].trim():currentMarket;
 
-  const effRent   = rent * occ;
-  const mgmtCost  = effRent * mgmt;
-  const totalExp  = mgmtCost + tax + maint;
-  const noi       = effRent - totalExp;
-  const capRate   = (noi / price) * 100;
-  const downAmt   = price * down;
-  const loan      = price - downAmt;
-  const rate      = 0.07 / 12;
-  const n         = 360;
-  const mo        = loan * rate * Math.pow(1 + rate, n) / (Math.pow(1 + rate, n) - 1);
-  const debt      = mo * 12;
-  const cashflow  = noi - debt;
-  const coc       = (cashflow / downAmt) * 100;
-  const grm       = Math.round((price / rent) * 10) / 10;
-
-  let verdict, vsub, cls;
-  if (coc >= tgtCoc && capRate >= 7) {
-    verdict = 'Strong Rental'; cls = 'hot';
-    vsub = 'Solid cash-on-cash and cap rate. This is a legitimate vacation rental play.';
-  } else if (coc >= tgtCoc * 0.7 && capRate >= 5) {
-    verdict = 'Dig Deeper'; cls = 'warm';
-    vsub = 'Decent returns but verify occupancy projections locally before committing.';
+  let verdict,vsub,cls;
+  if(coc>=tgtCoc&&capRate>=6){
+    verdict='Strong Play';cls='hot';
+    vsub=`Hits your ${tgtCoc}% CoC target with solid cap rate. This is the kind of deal that builds toward your wife joining the business full time.`;
+  } else if(coc>=tgtCoc*0.75&&capRate>=4){
+    verdict='Dig Deeper';cls='warm';
+    vsub=`Close to your target. Verify occupancy on AirDNA. Negotiating $15–20k off the price could make this a go.`;
   } else {
-    verdict = 'Thin Margins'; cls = 'pass';
-    vsub = 'Cash flow is too tight at this price and occupancy. Negotiate down or find a better market.';
+    verdict='Thin Margins';cls='pass';
+    vsub=`Cash flow too tight at this price. Negotiate harder, find a higher-demand market, or wait for a better deal. Don\'t force it.`;
   }
 
-  showResults(verdict, vsub, cls,
-    [
-      { label: 'Cash-on-Cash',   val: pct(coc),       cls: colorClass(coc, tgtCoc, tgtCoc * 0.7) },
-      { label: 'Cap Rate',       val: pct(capRate),   cls: colorClass(capRate, 7, 5) },
-      { label: 'Annual Cash Flow', val: fmt(cashflow), cls: colorClass(cashflow, 5000, 0) },
-      { label: 'Gross Rent Mult', val: grm + 'x',     cls: colorClass(15 - grm, 8, 4) },
-    ],
-    [
-      { label: 'Gross annual rent',                       val: fmt(rent) },
-      { label: `Effective rent (${Math.round(occ*100)}% occ.)`, val: fmt(effRent) },
-      { label: 'Management fees',                         val: '–' + fmt(mgmtCost) },
-      { label: 'Taxes + insurance',                       val: '–' + fmt(tax) },
-      { label: 'Maintenance',                             val: '–' + fmt(maint) },
-      { label: 'Net operating income',                    val: fmt(noi) },
-      { label: 'Annual debt service (7%)',                val: '–' + fmt(debt) },
-      { label: 'Net cash flow',                           val: fmt(cashflow), total: true, color: cashflow >= 0 ? '#b8ff57' : '#ff6b6b' },
-    ]
-  );
+  setVerdict('v',verdict,vsub,cls);
+  renderMetrics('v-metrics',[
+    {l:'Cash-on-Cash',v:pct(coc),c:cc(coc,tgtCoc,tgtCoc*0.75)},
+    {l:'Cap Rate',v:pct(capRate),c:cc(capRate,6,4)},
+    {l:'Annual Cash Flow',v:fmt(cashflow),c:cc(cashflow,6000,0)},
+    {l:'Gross Rent Mult',v:grm+'x',c:cc(18-grm,8,4)},
+  ]);
+  renderBkd('v-bkd',[
+    {l:`Gross rent (${Math.round(occ*100)}% occ.)`,v:fmt(grossRent)},
+    {l:'Mgmt / platform fees',v:'– '+fmt(mgmtCost)},
+    {l:'Taxes + insurance',v:'– '+fmt(tax)},
+    {l:'Maintenance',v:'– '+fmt(maint)},
+    {l:'Net operating income',v:fmt(noi)},
+    {l:`Debt service (${Math.round(rate*100)}%)`,v:'– '+fmt(debt)},
+    {l:'Total cash invested',v:fmt(totalInvest)},
+    {l:'Net annual cash flow',v:fmt(cashflow),tot:true,color:cashflow>=0?'#b8ff57':'#ff6b6b'},
+  ]);
+
+  lastSTR={price,nightly,occ:Math.round(occ*100),grossRent,cashflow,coc,capRate,verdict,cls,market:Object.keys(MARKETS).find(k=>k===currentMarket)?currentMarket:'custom'};
+  const r=document.getElementById('str-results');
+  r.style.display='block';
+  r.scrollIntoView({behavior:'smooth'});
 }
+
+function resetPage(type){
+  if(type==='flip'){
+    document.getElementById('flip-results').style.display='none';
+    ['f-ask','f-arv','f-rep'].forEach(id=>document.getElementById(id).value='');
+    lastFlip=null;
+  } else {
+    document.getElementById('str-results').style.display='none';
+    ['v-price','v-nightly'].forEach(id=>document.getElementById(id).value='');
+    lastSTR=null;
+  }
+}
+
+function getDeals(){try{return JSON.parse(localStorage.getItem('ds-deals')||'[]');}catch{return[];}}
+function saveDeals(d){localStorage.setItem('ds-deals',JSON.stringify(d));}
+
+function saveDeal(type){
+  const nameEl=document.getElementById(type==='flip'?'f-save-name':'v-save-name');
+  const name=nameEl.value.trim();
+  if(!name){alert('Give this deal a name before saving.');nameEl.focus();return;}
+  const result=type==='flip'?lastFlip:lastSTR;
+  if(!result){alert('Analyze a deal first.');return;}
+  const deals=getDeals();
+  deals.unshift({
+    id:Date.now(),name,type,
+    date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+    ...result,
+  });
+  saveDeals(deals);
+  nameEl.value='';
+  alert('"'+name+'" saved to your pipeline!');
+}
+
+function deleteDeal(id){
+  if(!confirm('Remove this deal?')) return;
+  saveDeals(getDeals().filter(d=>d.id!==id));
+  renderDeals();
+}
+
+function filterDeals(f,el){
+  activeFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderDeals();
+}
+
+function renderDeals(){
+  let deals=getDeals();
+  const total=deals.length;
+  if(activeFilter==='flip') deals=deals.filter(d=>d.type==='flip');
+  else if(activeFilter==='str') deals=deals.filter(d=>d.type==='str');
+  else if(activeFilter==='hot') deals=deals.filter(d=>d.cls==='hot');
+  document.getElementById('deal-count').textContent=total+' deal'+(total!==1?'s':'');
+  const el=document.getElementById('deals-list');
+  if(deals.length===0){
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><p>No saved deals yet.<br>Analyze a deal and hit Save<br>to build your pipeline.</p></div>`;
+    return;
+  }
+  el.innerHTML=deals.map(d=>{
+    const isFlip=d.type==='flip';
+    const s1=isFlip?`<div class="deal-stat"><strong>${fmt(d.profit)}</strong> profit</div>`:`<div class="deal-stat"><strong>${fmt(d.cashflow)}</strong>/yr</div>`;
+    const s2=isFlip?`<div class="deal-stat"><strong>${pct(d.roi)}</strong> ROI</div>`:`<div class="deal-stat"><strong>${pct(d.coc)}</strong> CoC</div>`;
+    const meta=isFlip?`Fix & Flip · ${d.date}`:`STR · ${(d.market||'').toUpperCase()} · ${d.date}`;
+    return `<div class="deal-card">
+      <div class="deal-card-top">
+        <div><div class="deal-name">${d.name}</div><div class="deal-meta">${meta}</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="deal-badge badge-${d.cls}">${d.verdict}</div>
+          <button class="btn-del" onclick="deleteDeal(${d.id});event.stopPropagation()">×</button>
+        </div>
+      </div>
+      <div class="deal-stats">${s1}${s2}</div>
+    </div>`;
+  }).join('');
+}
+
+setMarket('ocean',document.querySelector('#str-presets .preset'));
 </script>
 </body>
 </html>
